@@ -1,4 +1,4 @@
-name: Playwright Smoke Tests
+name: Playwright Smoke Test
 
 on:
   repository_dispatch:
@@ -9,25 +9,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      # Checkout repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
+      # Setup Node
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      # Install dependencies
       - name: Install Dependencies
         run: npm ci
 
-      - name: Install Browsers
+      # Install Playwright browsers
+      - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
+      # Run smoke tests
       - name: Run Smoke Tests
         run: npx playwright test --grep "@smoke"
 
-      - name: Upload Report
+      # Upload test report (very important)
+      - name: Upload Test Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: report
+          name: playwright-report
           path: playwright-report/
