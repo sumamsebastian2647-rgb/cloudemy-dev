@@ -9,8 +9,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repository
-      - name: Checkout Code
+      # Checkout GitHub repo (workflow repo)
+      - name: Checkout Workflow Repo
         uses: actions/checkout@v4
 
       # Setup Node
@@ -19,22 +19,19 @@ jobs:
         with:
           node-version: 20
 
-      # Install dependencies
-      - name: Install Dependencies
-        run: npm ci
+      # Clone Bitbucket Test Repo
+      - name: Clone Bitbucket Automation Repo
+        run: |
+          git clone https://${{ secrets.BB_USERNAME }}:${{ secrets.BB_APP_PASSWORD }}@bitbucket.org/cloudemycomau/automation-testing.git
+          cd automation-testing
+          npm ci
+          npx playwright install --with-deps
+          npx playwright test --grep "@smoke"
 
-      # Install Playwright browsers
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-
-      # Run smoke tests
-      - name: Run Smoke Tests
-        run: npx playwright test --grep "@smoke"
-
-      # Upload test report (very important)
+      # Upload Report
       - name: Upload Test Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
-          path: playwright-report/
+          path: automation-testing/playwright-report/
